@@ -8,6 +8,7 @@ import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -130,6 +131,34 @@ public class MainHook implements IXposedHookLoadPackage {
                             param.setResult(newP);
                             Log.i("LSPosed-Bridge", "restored policy in OplusNotificationManagerServiceExtImpl.adjustNotificationPolicy");
                         }
+                    }
+                }
+            });
+
+            XposedHelpers.findAndHookMethod("com.android.server.pm.permission.OplusPermSupportedFunctionManager", lpparam.classLoader, "shouldRevokeShellPermission", android.content.Context.class, java.lang.String.class, int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    super.beforeHookedMethod(param);
+                }
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if (param.getResult() != null && param.getResult() instanceof Boolean && ((Boolean) param.getResult()).booleanValue() == true) {
+                        String logMsg = String.format(Locale.ENGLISH, "OplusRivModXposed : com.android.server.pm.permission.OplusPermSupportedFunctionManager.shouldRevokeShellPermission blocked shell's (uid=%d) permission \"%s\". Now reverting it !!!!",
+                                param.args[2] != null ? ((Integer) param.args[2]).intValue() : -99991234,
+                                param.args[1] != null ? ((String) param.args[1]) : "(null???)");
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        Log.w("LSPosed-Bridge", logMsg);
+                        param.setResult(false);
                     }
                 }
             });
