@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.location.Location;
+import android.os.Binder;
+import android.os.Process;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
@@ -159,6 +162,27 @@ public class MainHook implements IXposedHookLoadPackage {
                         Log.w("LSPosed-Bridge", logMsg);
                         Log.w("LSPosed-Bridge", logMsg);
                         param.setResult(false);
+                    }
+                }
+            });
+
+            XposedHelpers.findAndHookMethod("android.location.Location", lpparam.classLoader, "toString", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    super.beforeHookedMethod(param);
+                }
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if (param.getResult() != null && param.getResult() instanceof String) {
+                        int currProcessUid = Process.myUid();
+                        int currProcessUid2 = Binder.getCallingUid();
+                        Log.w("LSPosed-Bridge", "OplusRivModXposed : Location.toString hook : currProcessUid=" + currProcessUid + " currProcessUid2=" + currProcessUid2);
+                        if (/* currProcessUid == 0 || */currProcessUid2 == 0) {
+                            Log.w("LSPosed-Bridge", "OplusRivModXposed : returning real location koords");
+                            StringBuilder s = new StringBuilder((String) param.getResult());
+                            s.append(" ").append(String.format(Locale.ROOT, "realKoords=%.6f---%.6f", Double.valueOf(((Location) param.thisObject).getLatitude()), Double.valueOf(((Location) param.thisObject).getLongitude())));
+                            param.setResult(s.toString());
+                        }
                     }
                 }
             });
